@@ -1,0 +1,12 @@
+services:
+  app:
+    build: .
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      # Este volume impede que o node_modules local (se existir) 
+      # sobrescreva o node_modules otimizado do container
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
