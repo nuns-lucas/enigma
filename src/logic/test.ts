@@ -1,16 +1,23 @@
-export function test(userInput: string) {
-  const alfabeto: string = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+export function test(char: string): string {
   const rotor1: string = "EKMFLGDQVZNTOWYHXUSPAIBRCJ";
-  let newText: string = "";
-  var n = 0;
+  var indexABC: number = mapABC(char.toUpperCase())
 
-  for (var i = 0; i < userInput.length; i++) {
-    while (userInput[i]?.toUpperCase() != alfabeto[n]) {
-      n += 1
+  var resultado = rotor1[indexABC]
+
+  if (resultado != null) {
+    return resultado;
+  }
+
+  return ""
+
+}
+
+function mapABC(letter: string): number {
+  const alfabeto: string = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  for (var i = 0; i < 25; i++) {
+    if (letter == alfabeto[i]) {
+      return i;
     }
-    var index_entrada = (n + 1) % 26
-    newText += rotor1[(index_entrada - 1 + 26) % 26]
-    n = 0
-  };
-  return newText;
+  }
+  return 0;
 }
