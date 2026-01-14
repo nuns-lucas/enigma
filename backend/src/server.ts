@@ -1,16 +1,16 @@
 import express from 'express';
-import cors from 'cors'; // Importante para o Vue conseguir acessar a API
+import cors from 'cors'; // IMPORTANT FOR VUE TO ACCESS API
 import { EnigmaEngine } from './enigmaEngine';
 
 const app = express();
-app.use(cors()); // Permite que seu frontend fale com o backend
+app.use(cors()); // Let front-end back-end comms
 app.use(express.json());
 
 const engine = new EnigmaEngine();
 
 app.post('/api/process', (req, res) => {
   const { text, positions } = req.body;
-  // Exemplo de body: { "text": "HELLO", "positions": {"p1": 0, "p2": 7, "p3": 15} }
+  // Body Example: { "text": "HELLO", "positions": {"p1": 0, "p2": 7, "p3": 15} }
 
   if (!text) return res.status(400).json({ error: "Texto faltando" });
 
@@ -22,4 +22,4 @@ app.post('/api/process', (req, res) => {
   });
 });
 
-app.listen(3000, () => console.log("Backend rodando na porta 3000"));
+app.listen(3000, () => console.log("Backend running 3000"));
