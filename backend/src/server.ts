@@ -6,15 +6,24 @@ const app = express();
 app.use(cors()); // Let front-end back-end comms
 app.use(express.json());
 
-const engine = new EnigmaEngine();
-
 app.post('/api/process', (req, res) => {
-  const { text, positions } = req.body;
-  // Body Example: { "text": "HELLO", "positions": {"p1": 0, "p2": 7, "p3": 15} }
+  // Now extracting rotorIds along with text and positions
+  const { text, positions, rotorIds } = req.body;
+
+  // Body Example:
+  // {
+  //   "text": "HELLO",
+  //   "positions": {"p1": 0, "p2": 7, "p3": 15},
+  //   "rotorIds": {"r1": 1, "r2": 2, "r3": 3}
+  // }
 
   if (!text) return res.status(400).json({ error: "Texto faltando" });
 
-  const result = engine.processText(text, positions);
+  // Create a fresh instance for each request to ensure real-time accuracy
+  const engine = new EnigmaEngine();
+
+  // Passing both positions and rotor choices to the engine
+  const result = engine.processText(text, positions, rotorIds);
 
   res.json({
     result,

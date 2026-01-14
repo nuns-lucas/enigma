@@ -1,84 +1,69 @@
 export class EnigmaEngine {
   private readonly ALPHA = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  private readonly R1 = "EKMFLGDQVZNTOWYHXUSPAIBRCJ";
-  private readonly R2 = "AJDKSIRUXBLHWTMCQGZNPYFVOE";
-  private readonly R3 = "BDFHJLCPRTXVZNYEIWGAKMUSQO";
+
+  // Library of the 5 historical rotors
+  private readonly ROTOR_LIBRARY: Record<number, { wire: string, notch: number }> = {
+    1: { wire: "EKMFLGDQVZNTOWYHXUSPAIBRCJ", notch: 16 }, // Q
+    2: { wire: "AJDKSIRUXBLHWTMCQGZNPYFVOE", notch: 4 },  // E
+    3: { wire: "BDFHJLCPRTXVZNYEIWGAKMUSQO", notch: 21 }, // V
+    4: { wire: "ESOVPZJAYQUIRHXLNFTGKDCMWB", notch: 9 },  // J
+    5: { wire: "VZBRGITYUPSDNHLXAWMJQOFECK", notch: 25 }  // Z
+  };
+
   private readonly REFLECTOR = "YRUHQSLDPXNGOKMIEBFZCWVJAT";
 
-  r1 = 0;
-  r2 = 0;
-  r3 = 0;
+  // Placeholders for the 3 rotors currently "plugged in"
+  private activeR1 = { wire: "", notch: 0 };
+  private activeR2 = { wire: "", notch: 0 };
+  private activeR3 = { wire: "", notch: 0 };
 
-  // Mod reset to accept diff positions
-  reset(pos = { p1: 0, p2: 0, p3: 0 }) {
+  r1 = 0; r2 = 0; r3 = 0;
+
+  reset(pos = { p1: 0, p2: 0, p3: 0 }, ids = { r1: 1, r2: 2, r3: 3 }) {
     this.r1 = pos.p1;
     this.r2 = pos.p2;
     this.r3 = pos.p3;
+    // Set the wiring based on the user's selection
+    this.activeR1 = this.ROTOR_LIBRARY[ids.r1] || this.ROTOR_LIBRARY[1];
+    this.activeR2 = this.ROTOR_LIBRARY[ids.r2] || this.ROTOR_LIBRARY[2];
+    this.activeR3 = this.ROTOR_LIBRARY[ids.r3] || this.ROTOR_LIBRARY[3];
   }
 
-  // Mod proceesText to accept different positions
-  public processText(text: string, initialPos = { p1: 0, p2: 0, p3: 0 }): string {
-    this.reset(initialPos); // Config rotors before starting
-    return text
-      .toUpperCase()
-      .split('')
-      .map(char => this.processChar(char))
-      .join('');
+  public processText(text: string, initialPos: any, rotorIds: any): string {
+    this.reset(initialPos, rotorIds);
+    return text.toUpperCase().split('').map(char => this.processChar(char)).join('');
   }
-
-  constructor() {
-    this.reset();
-  }
-
 
   private processChar(char: string): string {
-    // If not on alphabet returns same value
     if (!this.ALPHA.includes(char)) return char;
 
-    //Spin logic (Double Step)
-    const r3AtNotch = (this.r3 === 21); // V
-    const r2AtNotch = (this.r2 === 4);  // E
-
-    if (r2AtNotch) {
+    // Stepping logic using the notches of the SELECTED rotors
+    if (this.r2 === this.activeR2.notch) {
       this.r2 = (this.r2 + 1) % 26;
       this.r1 = (this.r1 + 1) % 26;
-    } else if (r3AtNotch) {
+    } else if (this.r3 === this.activeR3.notch) {
       this.r2 = (this.r2 + 1) % 26;
     }
     this.r3 = (this.r3 + 1) % 26;
 
-    // Encryption (Electric signal )
     let idx = this.ALPHA.indexOf(char);
-
-    // Going (Right -> Left)
-    idx = this.rotorPass(idx, this.R3, this.r3);
-    idx = this.rotorPass(idx, this.R2, this.r2);
-    idx = this.rotorPass(idx, this.R1, this.r1);
-
-    // Refelctor
+    idx = this.rotorPass(idx, this.activeR3.wire, this.r3);
+    idx = this.rotorPass(idx, this.activeR2.wire, this.r2);
+    idx = this.rotorPass(idx, this.activeR1.wire, this.r1);
     idx = this.ALPHA.indexOf(this.REFLECTOR[idx]);
-
-    // Back (Left -> Rigth)
-    idx = this.rotorPassInverse(idx, this.R1, this.r1);
-    idx = this.rotorPassInverse(idx, this.R2, this.r2);
-    idx = this.rotorPassInverse(idx, this.R3, this.r3);
-
-    // Return letter value
+    idx = this.rotorPassInverse(idx, this.activeR1.wire, this.r1);
+    idx = this.rotorPassInverse(idx, this.activeR2.wire, this.r2);
+    idx = this.rotorPassInverse(idx, this.activeR3.wire, this.r3);
     return this.ALPHA[idx];
   }
 
-  // Rotor change for going
-  private rotorPass(i: number, rotor: string, offset: number): number {
-    const shiftIn = (i + offset) % 26;
-    const letter = rotor[shiftIn];
-    return (this.ALPHA.indexOf(letter) - offset + 26) % 26;
+  private rotorPass(i: number, wire: string, off: number): number {
+    const shiftIn = (i + off) % 26;
+    return (this.ALPHA.indexOf(wire[shiftIn]) - off + 26) % 26;
   }
 
-  // Rotor change for returning (After relector)
-  private rotorPassInverse(i: number, rotor: string, offset: number): number {
-    const shiftIn = (i + offset) % 26;
-    const letter = this.ALPHA[shiftIn];
-    const posInRotor = rotor.indexOf(letter);
-    return (posInRotor - offset + 26) % 26;
+  private rotorPassInverse(i: number, wire: string, off: number): number {
+    const shiftIn = (i + off) % 26;
+    return (wire.indexOf(this.ALPHA[shiftIn]) - off + 26) % 26;
   }
 }
