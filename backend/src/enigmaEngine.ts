@@ -5,29 +5,31 @@ export class EnigmaEngine {
   private readonly R3 = "BDFHJLCPRTXVZNYEIWGAKMUSQO";
   private readonly REFLECTOR = "YRUHQSLDPXNGOKMIEBFZCWVJAT";
 
-  private r1 = 0;
-  private r2 = 0;
-  private r3 = 0;
+  r1 = 0;
+  r2 = 0;
+  r3 = 0;
 
-  constructor() {
-    this.reset();
+  // Modifique o reset para aceitar posições iniciais
+  reset(pos = { p1: 0, p2: 0, p3: 0 }) {
+    this.r1 = pos.p1;
+    this.r2 = pos.p2;
+    this.r3 = pos.p3;
   }
 
-  reset() {
-    this.r1 = 0;
-    this.r2 = 0;
-    this.r3 = 0;
-  }
-
-  // Função principal de processamento de texto
-  public processText(text: string): string {
-    this.reset();
+  // Modifique o processText para aceitar a configuração inicial
+  public processText(text: string, initialPos = { p1: 0, p2: 0, p3: 0 }): string {
+    this.reset(initialPos); // Configura os rotores antes de começar
     return text
       .toUpperCase()
       .split('')
       .map(char => this.processChar(char))
       .join('');
   }
+
+  constructor() {
+    this.reset();
+  }
+
 
   private processChar(char: string): string {
     if (!this.ALPHA.includes(char)) return char;

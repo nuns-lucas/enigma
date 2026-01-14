@@ -1,12 +1,20 @@
 services:
-  app:
-    build: .
+  frontend:
+    build: ./frontend
     ports:
       - "5173:5173"
     volumes:
-      - .:/app
-      # Este volume impede que o node_modules local (se existir) 
-      # sobrescreva o node_modules otimizado do container
-      - /app/node_modules
-    environment:
-      - NODE_ENV=development
+      - ./frontend:/app
+      - /app/node_modules  
+    environment:           
+      - VITE_API_URL=http://localhost:3000
+    depends_on:
+      - backend
+
+  backend:
+    build: ./backend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend:/app
+    command: npx ts-node src/server.ts
