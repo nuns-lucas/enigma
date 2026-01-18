@@ -6,21 +6,20 @@ export interface Slot {
 }
 
 export const EnigmaService = {
-  async processText(text: string, slots: Slot[]) {
+  async processText(text: string, slots: Slot[], plugboard: string) {
     const payload = {
-      text: text,
-      // The 3 physical positions
+      text,
       positions: {
         p1: slots[0].position,
         p2: slots[1].position,
         p3: slots[2].position
       },
-      // The 3 selected rotor types (1-5)
       rotorIds: {
         r1: slots[0].rotorID,
         r2: slots[1].rotorID,
         r3: slots[2].rotorID
-      }
+      },
+      plugboard // e.g., "AZ BY"
     };
 
     const response = await fetch(`${API_BASE_URL}/api/process`, {

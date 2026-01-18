@@ -1,29 +1,18 @@
 import express from 'express';
-import cors from 'cors'; // IMPORTANT FOR VUE TO ACCESS API
+import cors from 'cors';
 import { EnigmaEngine } from './enigmaEngine';
 
 const app = express();
-app.use(cors()); // Let front-end back-end comms
+app.use(cors());
 app.use(express.json());
 
 app.post('/api/process', (req, res) => {
-  // Now extracting rotorIds along with text and positions
-  const { text, positions, rotorIds } = req.body;
+  const { text, positions, rotorIds, plugboard } = req.body;
 
-  // Body Example:
-  // {
-  //   "text": "HELLO",
-  //   "positions": {"p1": 0, "p2": 7, "p3": 15},
-  //   "rotorIds": {"r1": 1, "r2": 2, "r3": 3}
-  // }
+  if (!text) return res.status(400).json({ error: "No text provided" });
 
-  if (!text) return res.status(400).json({ error: "Texto faltando" });
-
-  // Create a fresh instance for each request to ensure real-time accuracy
   const engine = new EnigmaEngine();
-
-  // Passing both positions and rotor choices to the engine
-  const result = engine.processText(text, positions, rotorIds);
+  const result = engine.processText(text, positions, rotorIds, plugboard || "");
 
   res.json({
     result,
@@ -31,4 +20,6 @@ app.post('/api/process', (req, res) => {
   });
 });
 
-app.listen(3000, () => console.log("Backend running 3000"));
+app.listen(3000, () => {
+  console.log("Backend running on port 3000");
+});
