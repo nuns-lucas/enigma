@@ -17,5 +17,5 @@ services:
       - "3000:3000"
     volumes:
       - ./backend:/app
-        - /app/node_modules 
+      - /app/node_modules 
     command: npx ts-node src/server.ts
